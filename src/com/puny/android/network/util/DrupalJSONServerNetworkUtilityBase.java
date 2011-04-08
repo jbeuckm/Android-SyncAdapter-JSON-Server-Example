@@ -8,11 +8,13 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.params.ConnManagerParams;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 
@@ -23,8 +25,7 @@ import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Iterator;
 
 /*
@@ -41,7 +42,7 @@ public class DrupalJSONServerNetworkUtilityBase {
 
 	public static final int REGISTRATION_TIMEOUT = 30 * 1000; // ms
     
-    public static final String BASE_URL = "http://beigerecords.com/joe/lets_eat/rest";
+    public static final String BASE_URL = "[YOUR JSON SERVER REST ENDPOINT]";
 
     public static final String CONNECT_URI = BASE_URL + "/system/connect.json";
     public static final String AUTH_URI = BASE_URL + "/user/login.json";
@@ -110,10 +111,15 @@ public class DrupalJSONServerNetworkUtilityBase {
         	return false;
         }
         
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put(PARAM_SESSION_ID, mSessId);
-        params.put(PARAM_USERNAME, username);
-        params.put(PARAM_PASSWORD, password);
+//        Map<String, Object> params = new HashMap<String, Object>();
+//        params.put(PARAM_SESSION_ID, mSessId);
+//        params.put(PARAM_USERNAME, username);
+//        params.put(PARAM_PASSWORD, password);
+
+        ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
+        params.add(new BasicNameValuePair(PARAM_SESSION_ID, mSessId));
+        params.add(new BasicNameValuePair(PARAM_USERNAME, username));
+        params.add(new BasicNameValuePair(PARAM_PASSWORD, password));
 
         JSONObject json = prepareAndSendHttpPost(AUTH_URI, params);
         
@@ -157,15 +163,15 @@ public class DrupalJSONServerNetworkUtilityBase {
      * @param URI The URI for the post
      * @param params The variables to be converted to JSON and POSTed with this request.
      */
-    protected static JSONObject prepareAndSendHttpPost(String URI, Map<String, Object> params) {
-	    JSONObject json = null;
+    protected static JSONObject prepareAndSendHttpPost(String URI, ArrayList<NameValuePair> params) {
+    	JSONObject json = null;
 	    try {
 	        json = new JSONObject();
 	        if (params != null) {
-		        Iterator<Map.Entry<String, Object>> it = params.entrySet().iterator();
+		        Iterator<NameValuePair> it = params.iterator();
 		        while (it.hasNext()) {
-		            Map.Entry<String, Object> pair = (Map.Entry<String, Object>)it.next();
-		            json.put(pair.getKey().toString(), pair.getValue());
+		        	NameValuePair pair = it.next();
+		            json.put(pair.getName().toString(), pair.getValue());
 		        }
 	        }
 	    }
